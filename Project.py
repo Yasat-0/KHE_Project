@@ -1,6 +1,6 @@
 import pygame
 import random
-from assets import squirrel_img, obstacle_img, floor_img, PullutionBackground, PollutionObstacle, PovertyCity, Dumpster
+from assets import squirrel_img, obstacle_img, floor_img, PullutionBackground, PollutionObstacle, PovertyCity, Dumpster, ClimateBackground, ClimateObstacle, ending_img
 
 # Initialize Pygame
 pygame.init()
@@ -17,8 +17,8 @@ GREEN = (0, 50, 0)
 RED = (255, 0, 0)  # Color for the obstacle border
 
 # Game settings
-GRAVITY = 0.8
-JUMP_STRENGTH = 23  # Increased jump strength
+GRAVITY = 1.3
+JUMP_STRENGTH = 31  # Increased jump strength
 OBSTACLE_SPEED = 10
 
 # Squirrel settings
@@ -41,7 +41,7 @@ font = pygame.font.SysFont(None, 36)
 
 # Levels
 level = 1
-ScoretoBeat = 5
+ScoretoBeat = 10
 GameState = "start"
 current_Background = floor_img
 current_Obstacle = obstacle_img
@@ -75,7 +75,7 @@ def running_game():
             squirrel_velocity_y = 0
 
     # Move obstacle
-    obstacle_x -= OBSTACLE_SPEED + (score + level * 5) / 2
+    obstacle_x -= OBSTACLE_SPEED + (score // 2.5)
     if obstacle_x < -obstacle_width:
         obstacle_x = WIDTH
         obstacle_y = HEIGHT - obstacle_height - 10
@@ -90,7 +90,7 @@ def running_game():
         squirrel_velocity_y = 0
         is_jumping = False
         obstacle_x = WIDTH
-        score = 0  # Reset score on collision
+        score = level * 5 - 5  # Reset score on collision
 
     # Clear the screen
     screen.fill(WHITE)
@@ -112,20 +112,24 @@ def running_game():
 
 def check_score():
     global running, GameState, current_Background, current_Obstacle, level, ScoretoBeat
-    if score >= ScoretoBeat:
+    if score >= ScoretoBeat * level - 5:
         if level == 1:
             level += 1
-            ScoretoBeat = ScoretoBeat + 5
-            current_Background = PullutionBackground 
-            current_Obstacle = PollutionObstacle
+            current_Background = ClimateBackground
+            current_Obstacle = ClimateObstacle
             GameState = "break"
         elif level == 2:
             level += 1
-            ScoretoBeat = ScoretoBeat + 5
+            current_Background = PullutionBackground
+            current_Obstacle = PollutionObstacle
+            GameState = "break"
+        elif level == 3:
+            level += 1
             current_Background = PovertyCity
             current_Obstacle = Dumpster
             GameState = "break"
         else:
+            current_Background = ending_img
             GameState = "win"
 
 def startScreen():
@@ -150,16 +154,71 @@ def startScreen():
                 GameState = "running"
 
 def breakScreen():
-    global running, GameState, current_Background, current_Obstacle
+    global running, GameState, current_Background, current_Obstacle, level, ScoretoBeat, score
     screen.blit(current_Background, (0, 0))
-
-    break_text = font.render(f"Congratulations! You reached {ScoretoBeat} points!", True, BLACK)
-    break_rect = break_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 50))
-    screen.blit(break_text, break_rect)
     
-    continue_text = font.render("Travel to the next area", True, BLACK)
-    continue_rect = continue_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 50))
-    screen.blit(continue_text, continue_rect)
+    # Dynamically create the break text based on the level
+    if level == 2:
+        break_text = font.render(f"Congratulations! You reached {score} points!", True, WHITE)
+        detailed_text_lines = [
+            "Air pollution kills an estimated seven million people worldwide every year.",
+            "The World Health Organization estimates that 9 out of 10 people breathe air",
+            "containing high levels of pollutants."
+        ]
+        y_offset = HEIGHT // 2 + 50
+        for line in detailed_text_lines:
+            detailed_text = font.render(line, True, WHITE)
+            detailed_rect = detailed_text.get_rect(center=(WIDTH // 2, y_offset))
+            screen.blit(detailed_text, detailed_rect)
+            y_offset += 30  # Adjust the offset for the next line
+    elif level == 3:
+        break_text = font.render(f"Congratulations! You reached {score} points!", True, WHITE)
+        detailed_text_lines = [
+            "While many wildfires are originally caused by people,",
+            "it is the result of climate change that has led to an increased spreading,",
+            "longer fire seasons, and difficulty in putting out the wildfires.",
+            "The number of large wildfires in the western United States has doubled between 1984 and 2015.",
+            "- Center for Climate and Energy Solutions"
+        ]
+        y_offset = HEIGHT // 2 + 50
+        for line in detailed_text_lines:
+            detailed_text = font.render(line, True, WHITE)
+            detailed_rect = detailed_text.get_rect(center=(WIDTH // 2, y_offset))
+            screen.blit(detailed_text, detailed_rect)
+            y_offset += 30  # Adjust the offset for the next line
+    elif level == 4:
+        break_text = font.render(f"Congratulations! You reached {score} points!", True, WHITE)
+        detailed_text_lines = [
+            "Redlining is an illegal practice of denying financial support to certain areas",
+            "of housing that are known to have ethnic minorities residing.",
+            "While it is now illegal, the byproducts of these practices have become harmful",
+            "to the areas where these minorities are still living.",
+            "This has led to the creation of food deserts and the action of uncontrollable",
+            "gerrymandering in states.",
+            "- Federal Reserve History"
+        ]
+        y_offset = HEIGHT // 2 + 50
+        for line in detailed_text_lines:
+            # Render shadow
+            shadow_text = font.render(line, True, (50, 50, 50))
+            shadow_rect = shadow_text.get_rect(center=(WIDTH // 2 + 2, y_offset + 2))
+            screen.blit(shadow_text, shadow_rect)
+            
+            # Render main text
+            detailed_text = font.render(line, True, WHITE)
+            detailed_rect = detailed_text.get_rect(center=(WIDTH // 2, y_offset))
+            screen.blit(detailed_text, detailed_rect)
+            y_offset += 30  # Adjust the offset for the next line
+    else:
+        GameState = "win"
+        break_text = font.render("You’ve completed the journey!", True, BLACK)
+        detailed_text = font.render("Congratulations on making it through all levels.", True, BLACK)
+    
+    # Render the break text
+    break_rect = break_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 50))
+    detailed_rect = detailed_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 50))
+    screen.blit(break_text, break_rect)
+
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -175,7 +234,6 @@ def reset_game():
     squirrel_velocity_y = 0
     is_jumping = False
     obstacle_x = WIDTH
-    score = 0
 
 while running:
     if GameState == "running":
@@ -185,8 +243,10 @@ while running:
     elif GameState == "break":
         breakScreen()
     elif GameState == "win":
-        screen.fill(WHITE)
-        win_text = font.render("You made it through to the end! However, the affects of everything you went through has caused so much harm to your body that you ", True, BLACK)
+        screen.blit(ending_img, (0, 0))
+        win_text = font.render("Unless someone like you cares a whole awful lot, nothing is going to get better. It's not. - Dr. Seuss", True, WHITE)
+        win_rect = win_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        screen.blit(win_text, win_rect)
         win_rect = win_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
         screen.blit(win_text, win_rect)
         for event in pygame.event.get():
@@ -197,3 +257,4 @@ while running:
     clock.tick(60)
 
 pygame.quit()
+

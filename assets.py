@@ -11,9 +11,11 @@ DOWNLOADS_DIR = os.path.join(os.path.expanduser('~'), 'Downloads')
 squirrel_img = pygame.image.load(os.path.join(DOWNLOADS_DIR, 'PixelSquirrelNoBackground.png.png'))
 obstacle_img = pygame.image.load(os.path.join(DOWNLOADS_DIR, 'PixelTree.png'))
 floor_img = pygame.image.load(os.path.join(DOWNLOADS_DIR, 'background.png'))
+ending_img = pygame.image.load(os.path.join(DOWNLOADS_DIR, 'ending.jpg'))
 
 #CLimate Change
-
+ClimateBackground = pygame.image.load(os.path.join(DOWNLOADS_DIR, 'ClimateBackground.png'))
+ClimateObstacle = pygame.image.load(os.path.join(DOWNLOADS_DIR, 'ClimateObstacle.png'))
 
 #Pollution
 PullutionBackground = pygame.image.load(os.path.join(DOWNLOADS_DIR, 'pollutionBackground.jpg'))
@@ -28,8 +30,11 @@ Dumpster = pygame.image.load(os.path.join(DOWNLOADS_DIR, 'Dumpster.png'))
 squirrel_img = pygame.transform.scale(squirrel_img, (squirrel_img.get_width() // 2.75, squirrel_img.get_height() // 2))
 obstacle_img = pygame.transform.scale(obstacle_img, (obstacle_img.get_width() // 1.5, obstacle_img.get_height() // 1))
 PollutionObstacle = pygame.transform.scale(PollutionObstacle, (PollutionObstacle.get_width() // 2.75, PollutionObstacle.get_height() // 2))
+ClimateObstacle = pygame.transform.scale(ClimateObstacle, (ClimateObstacle.get_width() // 2, ClimateObstacle.get_height() // 2))
 
 # Scale background to fit the screen
 floor_img = pygame.transform.scale(floor_img, (1200, 600))
 PullutionBackground = pygame.transform.scale(PullutionBackground, (1200, 600))
 PovertyCity = pygame.transform.scale(PovertyCity, (1200, 600))
+ClimateBackground = pygame.transform.scale(ClimateBackground, (1200, 600))
+ending_img = pygame.transform.scale(ending_img, (1200, 600))
