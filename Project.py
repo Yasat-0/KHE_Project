@@ -1,9 +1,6 @@
 import pygame
 import random
-from assets import squirrel_img, obstacle_img, floor_img
-
-ScoretoBeat = 2
-GameState = "start"
+from assets import squirrel_img, obstacle_img, floor_img, PullutionBackground, PollutionObstacle, PovertyCity, Dumpster
 
 # Initialize Pygame
 pygame.init()
@@ -17,6 +14,7 @@ pygame.display.set_caption("Squirrels for Life")
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (0, 50, 0)
+RED = (255, 0, 0)  # Color for the obstacle border
 
 # Game settings
 GRAVITY = 0.8
@@ -41,18 +39,24 @@ obstacle_y = HEIGHT - obstacle_height - 20
 score = 0
 font = pygame.font.SysFont(None, 36)
 
+# Levels
+level = 1
+ScoretoBeat = 5
+GameState = "start"
+current_Background = floor_img
+current_Obstacle = obstacle_img
+
 # Main game loop
 running = True
 clock = pygame.time.Clock()
 
-#Start Page
+# Start Page
 start_button = pygame.Rect(WIDTH // 2 - 100, HEIGHT // 2 - 50, 200, 100)
 start = False
 
-#make a dev function followed by an if statemet to check if the player hit start
 def running_game():
+    global squirrel_x, squirrel_y, squirrel_velocity_y, is_jumping, obstacle_x, obstacle_y, score, running, GameState, current_Background, current_Obstacle
 
-    global squirrel_x, squirrel_y, squirrel_velocity_y, is_jumping, obstacle_x, obstacle_y, score, running
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -71,7 +75,7 @@ def running_game():
             squirrel_velocity_y = 0
 
     # Move obstacle
-    obstacle_x -= OBSTACLE_SPEED
+    obstacle_x -= OBSTACLE_SPEED + (score + level * 5) / 2
     if obstacle_x < -obstacle_width:
         obstacle_x = WIDTH
         obstacle_y = HEIGHT - obstacle_height - 10
@@ -92,80 +96,104 @@ def running_game():
     screen.fill(WHITE)
 
     # Draw floor
-    screen.blit(floor_img, (0, 0))
+    screen.blit(current_Background, (0, 0))
 
     # Draw squirrel
     screen.blit(squirrel_img, (squirrel_x, squirrel_y))
 
     # Draw obstacle
-    screen.blit(obstacle_img, (obstacle_x, obstacle_y))
+    screen.blit(current_Obstacle, (obstacle_x, obstacle_y))
 
     # Draw score
     score_text = font.render(f"Score: {score}", True, BLACK)
     screen.blit(score_text, (10, 10))
 
-
-    def check_score():
-        global running, start, GameState
-        if score >= ScoretoBeat:
-            GameState = "paused"
-            while GameState == "paused":
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        GameState = "end"
-                        running = False
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_RETURN:
-                            GameState = "start"  # Reset to start screen
-
-
-                screen.fill(WHITE)
-                pause_text = font.render(f"Congratulations! You reached {ScoretoBeat} points!", True, BLACK)
-                pause_rect = pause_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 50))
-                screen.blit(pause_text, pause_rect)
-
-                continue_text = font.render("Press Enter to continue", True, BLACK)
-                continue_rect = continue_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 50))
-                screen.blit(continue_text, continue_rect)
-
     check_score()
 
+def check_score():
+    global running, GameState, current_Background, current_Obstacle, level, ScoretoBeat
+    if score >= ScoretoBeat:
+        if level == 1:
+            level += 1
+            ScoretoBeat = ScoretoBeat + 5
+            current_Background = PullutionBackground 
+            current_Obstacle = PollutionObstacle
+            GameState = "break"
+        elif level == 2:
+            level += 1
+            ScoretoBeat = ScoretoBeat + 5
+            current_Background = PovertyCity
+            current_Obstacle = Dumpster
+            GameState = "break"
+        else:
+            GameState = "win"
+
 def startScreen():
-        global running, start, GameState
-        screen.blit(floor_img, (0, 0))
-        
-        # Display the introductory text
-        intro_text = font.render("Join the squirrel's journey through a changing environment!", True, BLACK)
-        intro_rect = intro_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 100))
-        screen.blit(intro_text, intro_rect)
-        
-        pygame.draw.rect(screen, GREEN, start_button)
-        start_text = font.render("Start", True, WHITE)
-        text_rect = start_text.get_rect(center=start_button.center)
-        screen.blit(start_text, text_rect)
-        
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if start_button.collidepoint(event.pos):
-                    GameState = "running"
+    global running, start, GameState
+    screen.blit(floor_img, (0, 0))
+    
+    # Display the introductory text
+    intro_text = font.render("Join the squirrel's journey through a changing environment!", True, BLACK)
+    intro_rect = intro_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 100))
+    screen.blit(intro_text, intro_rect)
+    
+    pygame.draw.rect(screen, GREEN, start_button)
+    start_text = font.render("Start", True, WHITE)
+    text_rect = start_text.get_rect(center=start_button.center)
+    screen.blit(start_text, text_rect)
+    
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if start_button.collidepoint(event.pos):
+                GameState = "running"
 
+def breakScreen():
+    global running, GameState, current_Background, current_Obstacle
+    screen.blit(current_Background, (0, 0))
 
+    break_text = font.render(f"Congratulations! You reached {ScoretoBeat} points!", True, BLACK)
+    break_rect = break_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 50))
+    screen.blit(break_text, break_rect)
+    
+    continue_text = font.render("Travel to the next area", True, BLACK)
+    continue_rect = continue_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 50))
+    screen.blit(continue_text, continue_rect)
+    
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:
+                GameState = "running"
+                reset_game()
 
-
-
-
+def reset_game():
+    global squirrel_y, squirrel_velocity_y, is_jumping, obstacle_x, score
+    squirrel_y = HEIGHT - squirrel_height - 10
+    squirrel_velocity_y = 0
+    is_jumping = False
+    obstacle_x = WIDTH
+    score = 0
 
 while running:
     if GameState == "running":
         running_game()
     elif GameState == "start":
         startScreen()
+    elif GameState == "break":
+        breakScreen()
+    elif GameState == "win":
+        screen.fill(WHITE)
+        win_text = font.render("You made it through to the end! However, the affects of everything you went through has caused so much harm to your body that you ", True, BLACK)
+        win_rect = win_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        screen.blit(win_text, win_rect)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
     pygame.display.flip()
     clock.tick(60)
-
-
 
 pygame.quit()
