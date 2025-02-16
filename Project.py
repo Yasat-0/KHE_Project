@@ -14,7 +14,6 @@ pygame.display.set_caption("Squirrels for Life")
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (0, 50, 0)
-RED = (255, 0, 0)  # Color for the obstacle border
 
 # Game settings
 GRAVITY = 1.3
@@ -41,7 +40,7 @@ font = pygame.font.SysFont(None, 36)
 
 # Levels
 level = 1
-ScoretoBeat = 10
+ScoretoBeat = 5
 GameState = "start"
 current_Background = floor_img
 current_Obstacle = obstacle_img
@@ -90,7 +89,7 @@ def running_game():
         squirrel_velocity_y = 0
         is_jumping = False
         obstacle_x = WIDTH
-        score = level * 5 - 5  # Reset score on collision
+        score = int((5*(level-1)*(level))/2) # Reset score on collision
 
     # Clear the screen
     screen.fill(WHITE)
@@ -112,7 +111,7 @@ def running_game():
 
 def check_score():
     global running, GameState, current_Background, current_Obstacle, level, ScoretoBeat
-    if score >= ScoretoBeat * level - 5:
+    if score >= ((5*level*(level+1))/2) - (5 if level == 4 else 0):
         if level == 1:
             level += 1
             current_Background = ClimateBackground
